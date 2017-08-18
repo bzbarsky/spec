@@ -1,0 +1,172 @@
+<pre class='metadata'>
+Title: WebAssembly JS API
+H1: WebAssembly 
+Shortname: wasmjs
+Status: DREAM
+URL: https://webassembly.github.io/spec/JS.html
+Editor: Andreas Rossberg
+Repository: WebAssembly/spec
+Abstract: Explicit JavaScript API for interacting with WebAssembly on the Web
+Markup Shorthands: css no, markdown yes
+Ignored Terms: h1, h2, h3, h4, h5, h6, xmp
+</pre>
+
+
+In WebAssembly 1.0, the only way to access WebAssembly on the Web is through
+an explicit JS API which is defined below.
+
+Issue: In future versions, WebAssembly
+be loaded and run directly from an HTML `<script type='module'>` tag—and
+any other Web API that loads ES6 modules via URL—as part of 
+[ES6 Module integration](https://github.com/WebAssembly/design/issues/1087).)
+
+Note: WebAssembly JS API declaration file for TypeScript can be found [here](https://github.com/01alchemist/webassembly-types/blob/master/webassembly.d.ts) which enable autocompletion and make TypeScript compiler happy.
+
+The WebAssembly Object
+======================
+
+<!--
+The following IDL uses a couple features which are not in IDL currently:
+- To support constructors which are properties of the WebAssembly object, namespaces define interfacemembers. In the ECMAScript binding, these are writable, configurable, non-enumerable properties of the namespace.
+- The `[Exposed]` extended attribute is extended to allow things to be declared exposed on a namespace. What this does is simply check that the interface is declared within the namespace and not declare the interface on the primary global.
+- The @@toStringTag of interfaces which are declared in a namespace is the name of the outer namespace, followed by `.`, followed by the name of the interface.
+- The `nonwrapping` modifier to an integer type throws an exception if the Number is outside of the range which can be accurately represented in the range.  
+-->
+
+<pre class="idl">
+[Exposed=(Window,Worker)]
+namespace WebAssembly {
+  interface Module;
+  interface Instance;
+  interface Memory;
+  interface Table;
+
+  interface CompileError;
+  interface LinkError;
+  interface RuntimeError;
+
+  boolean validate(BufferSource bytes);
+  Promise<Module> compile(BufferSource bytes);
+  
+  Promise<WebAssemblyInstantiatedSource> instantiate(
+      BufferSource bytes, optional ImportObject importObject);
+
+  Promise<WebAssembly.Instance> instantiate(
+      Module moduleObject, optional ImportObject importObject);
+};
+
+dictionary WebAssemblyInstantiatedSource {
+   required WebAssembly.Module module;
+   required WebAssembly.Instance instance;
+};
+
+typedef (undefined or object) ImportObject;
+
+enum ImportExportKind {
+  "function",
+  "table",
+  "memory",
+  "global"
+};
+
+dictionary ModuleExportDescriptor {
+  required string name;
+  required ImportExportKind kind;
+};
+
+dictionary ModuleImportDescriptor {
+  required string module;
+  required string name;
+  required ImportExportKind kind;
+};
+
+[Exposed=WebAssembly, Contructor(BufferSource bytes)]
+interface Module {
+  static sequence<ModuleExportDescriptor> exports(Module module);
+  static sequence<ModuleImportDescriptor> imports(Module module);
+  static sequence<ArrayBuffer> customSections(Module module, string sectionName);
+};
+
+dictionary InstanceExportDescriptor {
+  required ImportExportKind kind;
+  ....
+}
+
+typedef record<string, InstanceExportDescriptor> InstanceExportMap;
+
+typedef record<string, InstanceExportsMap> InstanceImportsMap;
+
+[Exposed=WebAssembly, Contructor(Module module, optional InstanceImportsMap,  importObject)]
+interface Instance {
+  readonly attribute InstanceExportsMap exports;
+};
+
+dictionary MemoryDescriptor {
+  required nonwrapping unsigned long initial;
+  optional nonwrapping unsigned long maximum;
+};
+
+[Exposed=WebAssembly, Constructor(MemoryDecriptor descriptor)]
+interface Memory {
+  void grow(nonwrapping unsigned long delta);
+  readonly attribute ArrayBuffer buffer;
+};
+
+enum TableKind {
+  "anyfunc",
+};
+
+dictionary TableDescriptor {
+  required TableKind element;
+  required nonwrapping unsigned long initial;
+  optional nonwrapping unsigned long maximum;
+};
+
+[Exposed=WebAssembly, Constructor(TableDecriptor descriptor)]
+interface Memory {
+  void grow(nonwrapping unsigned long delta);
+  ExportedFunction get(nonwrapping unsigned long delta);
+  set(nonwrapping unsigned long delta, ExportedFunction value);
+  readonly attribute unsigned long length;
+};
+
+[NoInterfaceObject]
+interface ExportedFunction : Function { }
+</pre>
+
+Error condition mappings to JavaScript
+==============
+
+Running WebAssembly programs encounter certain events which halt execution of the WebAssembly code.
+WebAssembly code (currently)
+has no way to catch these conditions and thus an exception will necessarily
+propagate to the enclosing non-WebAssembly caller (either the browser or
+JavaScript) where it is handled like a normal JavaScript exception.
+
+If WebAssembly calls JavaScript via import and the JavaScript throws an
+exception, the exception is propagated through the WebAssembly activation to the
+enclosing caller.
+
+Because JavaScript exceptions can be handled, and JavaScript can continue to
+call WebAssembly exports after a trap has been handled, traps do not, in
+general, prevent future execution.
+
+Traps
+-----
+
+Whenever WebAssembly semantics specify a [trap](https://webassembly.github.io/spec/intro/overview.html#trap),
+a `WebAssembly.RuntimeError` object is thrown to the enclosing JavaScript. 
+
+Stack Overflow
+---------
+
+Whenever a [stack overflow](Semantics.md#stack-overflow) occurs in
+WebAssembly code, the same class of exception is thrown as for a stack overflow in
+JavaScript. The particular exception here is implementation-defined in both cases.
+
+Out of Memory
+---------
+
+Whenever validation, compilation or instantiation run out of memory, the
+same class of exception is thrown as for out of memory conditions in JavaScript.
+The particular exception here is implementation-defined in both cases.
