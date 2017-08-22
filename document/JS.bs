@@ -1,0 +1,594 @@
+<pre class='metadata'>
+Title: WebAssembly JS API
+H1: WebAssembly 
+Shortname: wasmjs
+Status: CG-DRAFT
+ED: https://webassembly.github.io/spec/JS.html
+Editor: Andreas Rossberg
+Repository: WebAssembly/spec
+Abstract: This document provides an explicit JavaScript API for interacting with WebAssembly.
+Markup Shorthands: css no, markdown yes
+Ignored Terms: h1, h2, h3, h4, h5, h6, xmp
+</pre>
+
+<pre class='biblio'>
+{
+  "ECMA-262": {
+    "href": "https://tc39.github.io/ecma262",
+    "title": "ECMAScript® 2018 Language Specification",
+    "publisher": "ECMA TC39",
+    "status": "Current Editor's Draft",
+  },
+  "WEBASSEMBLY": {
+    "href": "https://webassembly.github.io/spec/",
+    "title": "WebAssembly Specification",
+    "publisher": "W3C WebAssembly Community Group",
+    "status": "Draft",
+  },
+}
+</pre>
+
+<pre class="anchors">
+urlPrefix: https://tc39.github.io/ecma262/; spec: ECMA-262
+    type: interface; for: ECMAScript
+        text: ArrayBuffer; url: sec-arraybuffer-objects
+        text: DataView; url: sec-dataview-objects
+        text: Map; url: sec-map-objects
+        text: Promise; url: sec-promise-objects
+        text: Set; url: sec-set-objects
+        text: SharedArrayBuffer; url: sec-sharedarraybuffer-objects
+    type: exception; for: ECMAScript
+        text: Error; url: sec-error-objects
+        text: NativeError; url: sec-nativeerror-constructors
+    type: dfn
+        text: NumericLiteral; url: sec-literals-numeric-literals
+        text: ECMAScript error objects; url: sec-error-objects
+        text: ToBoolean; url: sec-toboolean
+        text: ToNumber; url: sec-tonumber
+        text: ToUint16; url: sec-touint16
+        text: ToInt32; url: sec-toint32
+        text: ToUint32; url: sec-touint32
+        text: ToString; url: sec-tostring
+        text: ToObject; url: sec-toobject
+        text: isFinite; url: sec-isfinite-number
+        text: IsAccessorDescriptor; url: sec-isaccessordescriptor
+        text: IsDataDescriptor; url: sec-isdatadescriptor
+        url: sec-ecmascript-data-types-and-values
+            text: Type
+            text: Type(x)
+        text: sign; url: eqn-sign
+        text: floor; url: eqn-floor
+        text: min; url: eqn-min
+        text: max; url: eqn-max
+        text: abs; url: eqn-abs
+        text: modulo; url: eqn-modulo
+        url: sec-algorithm-conventions
+            text: ECMA-262 section 5.2
+            text: conventions of the ECMAScript specification
+        url: sec-returnifabrupt-shorthands
+            text: !
+            text: ?
+        text: element; url: sec-ecmascript-language-types-string-type
+        url: sec-iscallable
+            text: IsCallable
+            text: callable; for: ECMAScript
+        url: sec-well-known-intrinsic-objects
+            text: %ArrayPrototype%
+            text: %ArrayProto_values%
+            text: %MapPrototype%
+            text: %SetPrototype%
+            text: %Error%
+            text: %ErrorPrototype%
+            text: %ObjProto_toString%
+            text: %IteratorPrototype%
+        text: %ObjectPrototype%; url: sec-properties-of-the-object-prototype-object
+        text: %FunctionPrototype%; url: sec-properties-of-the-function-prototype-object
+        text: %Promise%; url: sec-promise-constructor
+        text: Property Descriptor; url: sec-property-descriptor-specification-type
+        text: array index; url: sec-array-exotic-objects
+        text: OrdinaryGetOwnProperty; url: sec-ordinarygetownproperty
+        text: OrdinaryDefineOwnProperty; url: sec-ordinarydefineownproperty
+        text: OrdinaryPreventExtensions; url: sec-ordinarypreventextensions
+        text: OrdinarySet; url: sec-ordinaryset
+        text: equally close values; url: sec-ecmascript-language-types-number-type
+        text: internal slot; url: sec-object-internal-methods-and-internal-slots
+        text: JavaScript execution context stack; url: execution-context-stack
+        text: running JavaScript execution context; url: running-execution-context
+        text: GetIterator; url: sec-getiterator
+        text: IteratorStep; url: sec-iteratorstep
+        text: NormalCompletion; url: sec-normalcompletion
+        text: IteratorValue; url: sec-iteratorvalue
+        url: sec-well-known-symbols
+            text: @@iterator
+            text: @@toStringTag
+        text: CreateArrayIterator; url: sec-createarrayiterator
+        text: CreateIterResultObject; url: sec-createiterresultobject
+        text: CreateMapIterator; url: sec-createmapiterator
+        text: CreateSetIterator; url: sec-createsetiterator
+        text: ArrayCreate; url: sec-arraycreate
+        text: CreateDataProperty; url: sec-createdataproperty
+        text: DetachArrayBuffer; url: sec-detacharraybuffer
+        text: IsDetachedBuffer; url: sec-isdetachedbuffer
+        text: IsSharedArrayBuffer; url: sec-issharedarraybuffer
+        text: SetIntegrityLevel; url: sec-setintegritylevel
+        url: sec-array-iterator-objects
+            text: array iterator object
+            text: array iterator objects
+        text: Call; url: sec-call
+        text: Get; url: sec-get-o-p
+        text: Set; url: sec-set-o-p-v-throw
+        text: constructor; url: constructor
+        text: IsConstructor; url: sec-isconstructor
+        text: Construct; url: sec-construct
+        text: own property; url: sec-own-property
+        text: enumerable; url: sec-property-attributes
+        text: DefinePropertyOrThrow; url: sec-definepropertyorthrow
+        url: sec-code-realms
+            text: Realm
+            text: ECMAScript global environment
+        text: current Realm; url: current-realm
+        url: sec-completion-record-specification-type
+            text: Completion
+            text: Completion Record
+            text: abrupt completion
+        text: ObjectCreate; url: sec-objectcreate
+        text: CreateBuiltinFunction; url: sec-createbuiltinfunction
+        text: SetFunctionName; url: sec-setfunctionname
+        text: immutable prototype exotic object; url: sec-immutable-prototype-exotic-objects
+        text: sections 9.1; url: sec-ordinary-object-internal-methods-and-internal-slots
+        text: 9.3.1; url: sec-built-in-function-objects-call-thisargument-argumentslist
+        text: ECMA-262 section 9.3; url: sec-built-in-function-objects
+        text: built-in function object; url: sec-built-in-function-objects
+        text: function object; url: function-object
+        text: Array methods; url: sec-properties-of-the-array-prototype-object
+        text: typed arrays; url: sec-typedarray-objects
+        text: GetMethod; url: sec-getmethod
+        text: @@unscopables; url: sec-well-known-symbols
+        text: NewTarget; url: sec-built-in-function-objects
+        text: Number Type; url: sec-ecmascript-language-types-number-type
+        text: JSON.stringify; url: sec-json.stringify
+urlPrefix: https://webassembly.github.io/spec/; spec: WebAssembly; type: dfn
+    text: WebAssembly module validation url: valid/modules.html#valid-module
+    text: binary format of a module url: binary/modules.html
+    text: module AST url: syntax/modules.html
+    text: name section url: appendix/custom.html#name-section
+    text: import AST url: syntax/modules.html#imports
+</pre>
+
+This API is, initially, the only API for accessing WebAssembly [[WEBASSEMBLY]] from the Web Platform, through a bridge to explicitly construct modules from ECMAScript [[ECMASCRIPT]]. 
+
+Issue: In future versions, WebAssembly
+be loaded and run directly from an HTML `<script type='module'>` tag—and
+any other Web API that loads ES6 modules via URL—as part of 
+[ES6 Module integration](https://github.com/WebAssembly/design/issues/1087).)
+
+Note: WebAssembly JS API declaration file for TypeScript can be found [here](https://github.com/01alchemist/webassembly-types/blob/master/webassembly.d.ts) which enable autocompletion and make TypeScript compiler happy.
+
+The WebAssembly Object
+======================
+
+The following IDL uses a couple features which are not in IDL currently:
+- To support constructors which are properties of the WebAssembly object, namespaces define interfacemembers. In the ECMAScript binding, these are writable, configurable, non-enumerable properties of the namespace. Inner interfaces inherit the exposure set of the outer namespace.
+- The @@toStringTag of interfaces which are declared in a namespace is the name of the outer namespace, followed by `.`, followed by the name of the interface.
+- The `[Nowrap]` extended attribute to an integer type throws a RangeError if the Number is greater than or less than the range which can be accurately represented by the type.  
+
+<pre class="idl">
+[Exposed=(Window,Worker)]
+namespace WebAssembly {
+  boolean validate(BufferSource bytes);
+  Promise<Module> compile(BufferSource bytes);
+  
+  Promise<WebAssemblyInstantiatedSource> instantiate(
+      BufferSource bytes, optional ImportObject importObject);
+
+  Promise<WebAssembly.Instance> instantiate(
+      Module moduleObject, optional ImportObject importObject);
+};
+</pre>
+
+<!-- 
+Should we include notes describing what the functions do, as the HTML spec does? It could look like this:
+
+Note:
+  WebAssembly.validate(<var>bytes</var>) synchronously validates bytes of WebAssembly, returnintrue if the validation was successful.
+  WebAssembly.compile(<var>bytes</var>) asynchronously validates and complies bytes of WebAssembly into a Module.
+  WebAssembly.instantiate(<var>bytes</var>, <var>importObject</var>) asynchronously compiles and instantiates a WebAssembly module from bytes of source.
+  The WebAssembly.instantiate(<var>moduleObject</var>, <var>importObject</var>) asynchronously instantiates a compiled module.
+-->
+
+<div algorithm>
+  To <dfn>parse a WebAssembly binary module</dfn> from a BufferSource <var>buffer</var>, return a [=module AST=] whose [=binary format of a module|binary format=] is bytewise identical to <var>buffer</var>. If no such AST can be found, throw a {{WebAssembly.CompileError}} exception.
+</div>
+
+<div algorithm>
+  To <dfn>validate a WebAssembly module</dfn> from a WebAssembly AST <var>ast</var>, perform the following steps:
+    1. Attempt to prove ⊢ <var>ast</var> from the logic in [=WebAssembly module validation=]. If it cannot be derived, throw a {{WebAssembly.CompileError}} exception.
+    1. Validate any import names (for modules and individual imports) as UTF-8. If the module has a custom name section, validate any module names, function names and local names in the section as UTF-8. If validation fails, throw a {{WebAssembly.CompileError}} exception.
+    1. Return.
+</div>
+
+<div algorithm>
+  The <dfn method for="WebAssembly">validate</dfn>(<var>bytes</var>) method, when invoked, performs the following steps:
+  1. Let <var>ast</var> be the result of {{parsing the WebAssembly binary|parse the WebAssembly binary}}. If this throws an exception, catch it, and return `false`.
+  1. [=validate a WebAssembly module|validate the WebAssembly module=] <var>ast</var>. If this throws an exception, catch it, and return `false`.
+  1. Return `true`.
+</div>
+
+<div algorithm>
+  To <dfn>compile a WebAssembly module</dfn> from a BufferSource <var>bytes</var>, perform the following steps:
+  1. Let <var>ast</var> be the result of {{parsing the WebAssembly binary|parse the WebAssembly binary}} <var>bytes</var>.
+  1. [=validate a WebAssembly module|validate the WebAssembly module=] <var>ast</var>.
+  1. Return a new {{WebAssembly.Module}} object is returned with [[Module]] set to
+     the validated module <var>ast</var>.
+</div>
+
+<div algorithm>
+  The <dfn method for="WebAssembly">compile</dfn>(<var>bytes</var>) method, when invoked, performs the following steps:
+  1. Let <var>stableBytes</var> be a copy of the bytes held by the buffer source <var>bytes</var>.
+  1. Return a new promise <var>promise</var> and perform the following steps in parallel:
+    1. Compile a WebAssembly module from <var>stableBytes</var>, and let <var>module</var> be the result.  If this throws an exception, catch it, and reject <var>promise</var> with the exception.
+    1. Resolve <var>promise</var> with <var>module</var>.
+</div>
+
+<div algorithm>
+  To <dfn>instantiate a WebAssembly module</dfn> from a {{WebAssembly.Module}} <var>moduleObject</var> and imports <var>importObject</var>, perform the following steps:
+  1. Let <var>module</var> be <var>moduleObject</var>.\[[Module]].
+  1. If <var>module</var>.imports is not an empty list, and <var>importObject</var> is undefined, throw a TypeError exception.
+  1. Let <var>funcs</var> be an empty List of callable JavaScript objects.
+  1. Let <var>memories</var> be an empty List of {{WebAssembly.Memory}} objects.
+  1. Let <var>tables</var> be an empty List of {{WebAssembly.Table}} objects.
+  1. Let <var>imports</var> be an empty List<!-- of [`external`](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L11) values (???)-->.
+  1. For each [=import AST|import=] <var>import</var> in <var>module</var>.imports,
+    1. Let o be the resultant value of performing
+       [`Get`](http://tc39.github.io/ecma262/#sec-get-o-p)(`importObject`, [`i.module_name`](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/ast.ml#L170)).
+    1. If `Type(o)` is not Object, throw a [`TypeError`](https://tc39.github.io/ecma262/#sec-native-error-types-used-in-this-standard-typeerror).
+    1. Let `v` be the value of performing [`Get`](http://tc39.github.io/ecma262/#sec-get-o-p)(`o`, [`i.item_name`](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/ast.ml#L171))
+    1. If `i` is a function import:
+       1. If [`IsCallable(v)`](https://tc39.github.io/ecma262/#sec-iscallable) is `false`,
+          throw a `WebAssembly.LinkError`.
+       1. If `v` is an [Exported Function Exotic Object](#exported-function-exotic-objects):
+          1. (The signature of `v.[[Closure]]` is checked against the import's declared
+             [`func_type`](https://github.com/WebAssembly/design/blob/master/BinaryEncoding.md#func_type)
+             by `Eval.init` below.)
+          1. Let `closure` be `v.[[Closure]]`.
+       1. Otherwise:
+          1. Let `closure` be a new [host function](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L9) value
+             of the given signature and the following behavior:
+          1. If the signature contains an `i64` (as argument or result), the host
+             function immediately throws a [`TypeError`](https://tc39.github.io/ecma262/#sec-native-error-types-used-in-this-standard-typeerror)
+             when called.
+          1. Otherwise, the host function calls `v` with an `undefined` receiver
+             and WebAssembly arguments coerced to JavaScript arguments
+             via [`ToJSValue`](#tojsvalue). The result is returned by coercing
+             via [`ToWebAssemblyValue`](#towebassemblyvalue).
+       1. Append `v` to `funcs`.
+       1. Append `closure` to `imports`.
+    1. If `i` is a global import:
+       1. [Assert](https://tc39.github.io/ecma262/#assert): the global is immutable
+          by MVP validation constraint.
+       1. If the `global_type` of `i` is `i64` or `Type(v)` is not Number, throw a `WebAssembly.LinkError`.
+       1. Append [`ToWebAssemblyValue`](#towebassemblyvalue)`(v)` to `imports`.
+    1. If `i` is a memory import:
+       1. If `v` is not a [`WebAssembly.Memory` object](#webassemblymemory-objects),
+          throw a `WebAssembly.LinkError`.
+       1. (The imported `Memory`'s `length` and `maximum` properties are checked against the import's declared
+          [`memory_type`](https://github.com/WebAssembly/design/blob/master/BinaryEncoding.md#memory_type)
+          by `Eval.init` below.)
+       1. Append `v` to `memories`.
+       1. Append `v.[[Memory]]` to `imports`.
+    1. Otherwise (`i` is a table import):
+       1. If `v` is not a [`WebAssembly.Table` object](#webassemblytable-objects),
+          throw a `WebAssembly.LinkError`.
+       1. (The imported `Table`'s `length`, `maximum` and `element` properties are checked against the import's declared
+          [`table_type`](https://github.com/WebAssembly/design/blob/master/BinaryEncoding.md#table_type)
+          by `Eval.init` below.)
+       1. Append `v` to `tables`.
+       1. Append `v.[[Table]]` to `imports`.
+       1. For each index `i` of `v.[[Table]]`:
+          1. Let `e` be the `i`the element of `v.[[Table]]`.
+       1. If `e` is a [`closure`](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L7) `c`:
+          1. Append the `i`th element of `v.[[Values]]` to `funcs`.
+
+
+<!--
+Note: Imported JavaScript functions are wrapped as [host function](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L9) values in the following algorithm. For the purpose of the algorithm, a _new_ [host function](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L9) value is always generated fresh and considered distinct from any other previously created host function value, including those wrapping the same JavaScript function object.
+Consequently, two [closure](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L7) values are considered equal if and only if:
+
+* Either they are both WebAssembly functions for the same instance and referring to the same function definition.
+* Or they are the same host function value.
+-->
+
+
+  1. Let `instance` be the result of creating a new
+    [`instance`](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L17)
+    by calling
+    [`Eval.init`](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/eval.ml#L416)
+    given `module` and `imports`.
+    If this terminates with a `Link` error, throw a `WebAssembly.LinkError`; if it causes a trap, throw a `WebAssembly.RuntimeError`; all other exceptions are propagated to the caller.
+    Among other things, this function performs the following observable steps:
+
+    * If, after evaluating the `offset` [initializer expression](Modules.md#initializer-expression)
+      of every [Data](Modules.md#data-section) and [Element](Modules.md#elements-section)
+      Segment, any of the segments do not fit in their respective Memory or Table, throw a 
+      `WebAssembly.LinkError`.
+
+    * Apply all Data and Element segments to their respective Memory or Table in the
+      order in which they appear in the module. Segments may overlap and, if they do,
+      the final value is the last value written in order. Note: there should be no
+      errors possible that would cause this operation to fail partway through. After
+      this operation completes, elements of `instance` are visible and callable
+      through [imported tables](Modules.md#imports), even if `start` fails.
+
+    * If a [`start`](Modules.md#module-start-function) is present, it is evaluated.
+      Any errors thrown by `start` are propagated to the caller.
+
+  1. The following steps are performed _before_ the `start` function executes:
+    1. For each table 't' in [`instance.tables`](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L17):
+       1. If there is no element in `tables` whose `table.[[Table]]` is `t`:
+          1. Let `table` be a new `WebAssembly.Table` object with [[Table]] set to `t` and [[Values]] set to a new list of the same length all whose entries are `null`.
+          1. Append `table` to `tables`.
+       1. Otherwise:
+          1. Let `table` be the element in `tables` whose `table.[[Table]]` is `t`
+       1. (Note: At most one `WebAssembly.Table` object is created for any table, so the above `table` is unique, even if there are multiple occurrances in the list. Moreover, if the item was an import, the original object will be found.)
+       1. For each index `i` of `t`:
+          1. Let `c` be the `i`th element of `t`
+          1. If `c` is a [`closure`](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L7) `c`:
+             1. If there is an [Exported Function Exotic Object](#exported-function-exotic-objects) in `funcs` whose `[[Closure]]` equals `c`:
+                1. Let `func` be that function object.
+             1. (Note: At most one wrapper is created for any closure, so `func` is uniquely determined. Moreover, if the item was an import that is already an [Exported Function Exotic Object](#exported-function-exotic-objects), then the original function object will be found. For imports that are regular JS functions, a new wrapper will be created.)
+             1. Otherwise:
+                1. Let `func` be an [Exported Function Exotic Object](#exported-function-exotic-objects) created from `c`.
+                1. Append `func` to `funcs`.
+             1. Set the `i`th element of `table.[[Values]]` to `func`.
+
+    (Note: The table and element function objects created by the above steps are only observable for tables that are either imported or exported.)
+
+  1. Let `exports` be a list of (string, JS value) pairs that is mapped from 
+    each [external](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L24) value `e` in `instance.exports` as follows:
+    1. If `e` is a [closure](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L12) `c`:
+       1. If there is an [Exported Function Exotic Object](#exported-function-exotic-objects) `func` in `funcs` whose `func.[[Closure]]` equals `c`, then return `func`.
+       1. (Note: At most one wrapper is created for any closure, so `func` is unique, even if there are multiple occurrances in the list. Moreover, if the item was an import that is already an [Exported Function Exotic Object](#exported-function-exotic-objects), then the original function object will be found. For imports that are regular JS functions, a new wrapper will be created.)
+       1. Otherwise:
+          1. Let `func` be an [Exported Function Exotic Object](#exported-function-exotic-objects) created from `c`.
+          1. Append `func` to `funcs`.
+          1. Return `func`.
+    1. If `e` is a [global](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L15) `v`:
+       1. [Assert](https://tc39.github.io/ecma262/#assert): the global is immutable
+          by MVP validation constraint.
+       1. If `v` is an `i64`, throw a `WebAssembly.LinkError`.
+       1. Return [`ToJSValue`](#tojsvalue)`(v)`.
+    1. If `e` is a [memory](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L14) `m`:
+       1. If there is an element `memory` in `memories` whose `memory.[[Memory]]` is `m`, then return `memory`.
+       1. (Note: At most one `WebAssembly.Memory` object is created for any memory, so the above `memory` is unique, even if there are multiple occurrances in the list. Moreover, if the item was an import, the original object will be found.)
+       1. Otherwise:
+          1. Let `memory` be a new `WebAssembly.Memory` object created via [`CreateMemoryObject`](#creatememoryobject) from `m`.
+          1. Append `memory` to `memories`.
+          1. Return `memory`.
+    1. Otherwise `e` must be a [table](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L13) `t`:
+       1. Assert: There is an element `table` in `tables` whose `table.[[Table]]` is `t`.
+       1. Return that `table`.
+
+  1. Let `exportsObject` be a new [frozen](https://tc39.github.io/ecma262/#sec-object.freeze)
+    plain JS object with [[Prototype]] set to Null and with properties defined
+    by mapping each export in `exports` to an enumerable, non-writable,
+    non-configurable data property. Note: the validity and uniqueness checks
+    performed during [module validation](#webassemblymodule-constructor) ensure
+    that each property name is valid and no properties are defined twice.
+
+  1. Let `instanceObject` be a new `WebAssembly.Instance` object setting
+    the internal `[[Instance]]` slot to `instance` and the `[[Exports]]` slot to
+    `exportsObject`.
+
+  1. Return `instanceObject`.
+</div>
+
+<div algorithm>
+  The <dfn method for="WebAssembly">instantiate</dfn>(<var>bytes</var>, <var>importObject</var>) method, when invoked, returns a new promise <var>promise</var> and performs the following steps in parallel:
+  1. Let <var>stableBytes</var> be a copy of the bytes held by the buffer source <var>bytes</var>.
+  1. Return a new promise <var>promise</var> and perform the following steps in parallel:
+    1. Construct a WebAssembly module from <var>stableBytes</var>, and let <var>module</var> be the result.  If this throws an exception, catch it, and reject <var>promise</var> with the exception.
+    1. Instantiate the WebAssembly module <var>module</var> importing <var>importObject</var>, and let <var>instance</var> be the result.  If this throws an exception, catch it, and reject <var>promise</var> with the exception.
+    1. Let <var>result</var> be a {{WebAssemblyInstantiatedSource}} dictionary with {{WebAssemblyInstantiatedSource/module}} set to <var>module</var> and {{WebAssemblyInstantiatedSource/instance}} set to <var>instance</var>.
+    1. Resolve <var>promise</var> with <var>result</var>.
+</div>
+
+<div algorithm>
+  The <dfn method for="WebAssembly">instantiate</dfn>(<var>moduleObject</var>, <var>importObject</var>) method, when invoked, returns a new promise <var>promise</var> and performs the following steps in parallel:
+    1. Instantiate the WebAssembly module <var>module</var> importing <var>importObject</var>, and let <var>instance</var> be the result.  If this throws an exception, catch it, and reject <var>promise</var> with the exception.
+    1. Resolve <var>promise</var> with <var>instance</var>.
+</div>
+
+
+Note: A follow-on streaming API is documented [in the WebAssembly design repository](https://github.com/WebAssembly/design/blob/master/Web.md#additional-web-embedding-api).
+
+<pre class="idl">
+dictionary WebAssemblyInstantiatedSource {
+   required WebAssembly.Module module;
+   required WebAssembly.Instance instance;
+};
+
+typedef (undefined or object) ImportObject;
+
+enum ImportExportKind {
+  "function",
+  "table",
+  "memory",
+  "global"
+};
+
+dictionary ModuleExportDescriptor {
+  required string name;
+  required ImportExportKind kind;
+  // Note: Other fields such as signature may be added in the future.
+};
+
+dictionary ModuleImportDescriptor {
+  required string module;
+  required string name;
+  required ImportExportKind kind;
+};
+
+partial namespace WebAssembly {
+  [Contructor(BufferSource bytes)]
+  interface Module {
+    static sequence<ModuleExportDescriptor> exports(Module module);
+    static sequence<ModuleImportDescriptor> imports(Module module);
+    static sequence<ArrayBuffer> customSections(Module module, string sectionName);
+ };
+};
+</pre>
+
+<div algorithm>
+ The <dfn>name of the export</dfn> <var>export</var> in the module <var>module</var> is defined as follows:
+   1. If <var>export</var> is of the form 𝖿𝗎𝗇𝖼 <var>funcidx</var> and <var>module</var> has a name section with a function names subsection,
+     1. Within <code>funcnamesubsec</code>, search for an entry <code>nameassoc</code> of the form <var>funcidx</var> <code>name</code>. If such an entry is found, return <code>name</code> decoded as a UTF-8 into a JavaScript String.
+   1. Return the empty string.
+</div>
+
+<div algorithm>
+  The <dfn method for="WebAssembly.Module">exports</dfn>(<var>module</var>) method, when invoked, performs the following steps:
+  1. Let <var>ast</var> be <var>module</var>.[[Module]].
+  1. Let <var>exports</var> be an empty List.
+  1. For each <var>export</var> in <var>ast</var>.exports:
+    1. Let <var>name</var> be <var>export</var>.name as a String.
+    1. Let <var>kind</var> be
+      - `"function"` if <var>export</var>.desc is of the form 𝖿𝗎𝗇𝖼 funcidx
+      - `"table"` if <var>export</var>.desc is of the form 𝗍𝖺𝖻𝗅𝖾 tableidx
+      - `"memory"` if <var>export</var>.desc is of the form 𝗆𝖾𝗆  memidx
+      - `"global"` if <var>export</var>.desc is of the form 𝗀𝗅𝗈𝖻𝖺𝗅 globalidx
+    1. Let <var>obj</var> be ObjectCreate(%ObjectPrototype%).
+    1. Perform CreateDataProperty(obj, `"name"`, <var>name</var>).
+    1. Perform CreateDataProperty(obj, `"kind"`, <var>kind</var>).
+    1. Append <var>obj</obj> to the end of <var>exports</var>.
+  1. Return CreateArrayFromList(<var>exports</var>).
+</div>
+
+<div algorithm>
+  The <dfn method for="WebAssembly.Module">imports</dfn>(<var>module</var>) method, when invoked, performs the following steps:
+  1. Let <var>ast</var> be <var>module</var>.[[Module]].
+  1. Let <var>imports</var> be an empty List.
+  1. For each <var>imports</var> in <var>ast</var>.imports:
+    1. Let <var>module</var> be <var>import</var>.module as a String.
+    1. Let <var>name</var> be <var>import</var>.name as a String.
+    1. Let <var>kind</var> be
+      - `"function"` if <var>export</var> is of the form 𝖿𝗎𝗇𝖼 typeidx
+      - `"table"` if <var>export</var> is of the form 𝗍𝖺𝖻𝗅𝖾 tabletype
+      - `"memory"` if <var>export</var> is of the form 𝗆𝖾𝗆  memtype
+      - `"global"` if <var>export</var> is of the form 𝗀𝗅𝗈𝖻𝖺𝗅 globaltype
+    1. Let <var>obj</var> be ObjectCreate(%ObjectPrototype%).
+    1. Perform CreateDataProperty(obj, `"module"`, <var>module</var>).
+    1. Perform CreateDataProperty(obj, `"name"`, <var>name</var>).
+    1. Perform CreateDataProperty(obj, `"kind"`, <var>kind</var>).
+    1. Append <var>obj</obj> to the end of <var>imports</var>.
+  1. Return CreateArrayFromList(<var>imports</var>).
+</div>
+
+<pre class="idl">
+typedef (ExportedFunction or double or
+         WebAssembly.Memory or WebAssembly.Table)
+    WebAssemblyRuntimeValue;
+
+typedef record<string, WebAssemblyRuntimeValue> InstanceExportMap;
+
+typedef record<string, InstanceExportsMap> InstanceImportsMap;
+
+partial namespace WebAssembly {
+  [Contructor(Module module, optional InstanceImportsMap,  importObject)]
+  interface Instance {
+    readonly attribute InstanceExportsMap exports;
+  };
+};
+
+dictionary MemoryDescriptor {
+  required [Nowrap] unsigned long initial;
+  optional [Nowrap] unsigned long maximum;
+};
+
+partial namespace WebAssembly {
+  [Constructor(MemoryDecriptor descriptor)]
+  interface Memory {
+    void grow([Nowrap] unsigned long delta);
+    readonly attribute ArrayBuffer buffer;
+  };
+};
+</pre>
+
+
+
+<pre class="idl">
+enum TableKind {
+  "anyfunc",
+};
+
+dictionary TableDescriptor {
+  required TableKind element;
+  required [Nowrap] unsigned long initial;
+  optional [Nowrap] unsigned long maximum;
+};
+
+partial interface WebAssembly {
+  [Constructor(TableDecriptor descriptor)]
+  interface Memory {
+    void grow([Nowrap] unsigned long delta);
+    ExportedFunction get([Nowrap] unsigned long delta);
+    set([Nowrap] unsigned long delta, ExportedFunction value);
+    readonly attribute unsigned long length;
+  };
+};
+
+[NoInterfaceObject]
+interface ExportedFunction : Function { }
+</pre>
+
+Error objects
+-------------
+
+WebAssembly defines three Error classes. Analogous to DOMException, WebAssembly errors have the following custom bindings:
+- Unlike normal interface types, the interface prototype object for DOMException must have as its [[Prototype]] the intrinsic object %ErrorPrototype%.
+- If an implementation gives native Error objects special powers or nonstandard properties (such as a stack property), it should also expose those on DOMException instances.
+- The constructor and properties of WebAssembly errors is as specified for [NativeErrors](https://tc39.github.io/ecma262/#sec-nativeerror-constructors).
+
+<pre class='idl'>
+partial interface WebAssembly {
+  interface CompileError { }
+  interface LinkError { }
+  interface RuntimeError { }
+}
+</pre>
+
+Error condition mappings to JavaScript
+==============
+
+Running WebAssembly programs encounter certain events which halt execution of the WebAssembly code.
+WebAssembly code (currently)
+has no way to catch these conditions and thus an exception will necessarily
+propagate to the enclosing non-WebAssembly caller (either the browser or
+JavaScript) where it is handled like a normal JavaScript exception.
+
+If WebAssembly calls JavaScript via import and the JavaScript throws an
+exception, the exception is propagated through the WebAssembly activation to the
+enclosing caller.
+
+Because JavaScript exceptions can be handled, and JavaScript can continue to
+call WebAssembly exports after a trap has been handled, traps do not, in
+general, prevent future execution.
+
+Traps
+-----
+
+Whenever WebAssembly semantics specify a [trap](https://webassembly.github.io/spec/intro/overview.html#trap),
+a `WebAssembly.RuntimeError` object is thrown to the enclosing JavaScript. 
+
+Stack Overflow
+---------
+
+Whenever a [stack overflow](Semantics.md#stack-overflow) occurs in
+WebAssembly code, the same class of exception is thrown as for a stack overflow in
+JavaScript. The particular exception here is implementation-defined in both cases.
+
+Out of Memory
+---------
+
+Whenever validation, compilation or instantiation run out of memory, the
+same class of exception is thrown as for out of memory conditions in JavaScript.
+The particular exception here is implementation-defined in both cases.
