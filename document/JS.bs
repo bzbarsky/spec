@@ -151,6 +151,7 @@ urlPrefix: https://webassembly.github.io/spec/; spec: WebAssembly; type: dfn
     text: WebAssembly module validation url: valid/modules.html#valid-module
     text: binary format of a module url: binary/modules.html
     text: module AST url: syntax/modules.html
+    text: name section url: appendix/custom.html#name-section
 </pre>
 
 This API is, initially, the only API for accessing WebAssembly [[WEBASSEMBLY]] from the Web Platform, through a bridge to explicitly construct modules from ECMAScript [[ECMASCRIPT]]. 
@@ -199,7 +200,10 @@ Note:
 </div>
 
 <div algorithm>
-  To <dfn>validate a WebAssembly module</dfn> from a WebAssembly AST <var>ast</var>, attempt to prove ⊢ <var>ast</var> from the logic in [=WebAssembly module validation=]. If it can be derived, return. Otherwise, throw a {{WebAssembly.CompileError}} exception.
+  To <dfn>validate a WebAssembly module</dfn> from a WebAssembly AST <var>ast</var>, perform the following steps:
+    1. Attempt to prove ⊢ <var>ast</var> from the logic in [=WebAssembly module validation=]. If it cannot be derived, throw a {{WebAssembly.CompileError}} exception.
+    1. If the module has a custom name section, validate all names in the section as UTF-8. If validation fails, throw a {{WebAssembly.CompileError}} exception.
+    1. Return.
 </div>
 
 <div algorithm>
@@ -423,6 +427,7 @@ enum ImportExportKind {
 dictionary ModuleExportDescriptor {
   required string name;
   required ImportExportKind kind;
+  // Note: Other fields such as signature may be added in the future.
 };
 
 dictionary ModuleImportDescriptor {
@@ -442,7 +447,25 @@ partial namespace WebAssembly {
 </pre>
 
 <div algorithm>
-  
+ The <dfn>name of the export</dfn> <var>export</var> in the module <var>module</var> is defined as follows:
+   1. If <var>export</var> is of the form 𝖿𝗎𝗇𝖼 <var>funcidx</var> and <var>module</var> has a name section,
+     1. If the ...
+     1. Let <var>moduleName</var> be <code>modulenamesubsec</code> decoded as UTF-8.
+     1. Let <var>
+</div>
+
+<div algorithm>
+  The <dfn method for="WebAssembly.Module">exports</dfn>(<var>module</var>) method, when invoked, performs the following steps:
+  1. Let <var>ast</var> be <var>module</var>.[[Module]].
+  1. Let <var>exports</var> be ArrayCreate(0).
+  1. For each <var>export</var> in <var>ast</var>.exports:
+    1. Let <var>name</var> be the name of the export <var>export</var> in the module <var>module</var>
+    1. Let <var>kind</var> be
+      - `"function"` if <var>export</var> is of the form 𝖿𝗎𝗇𝖼 funcidx
+      - `"table"` if <var>export</var> is of the form 𝗍𝖺𝖻𝗅𝖾 tableidx
+      - `"memory"` if <var>export</var> is of the form 𝗆𝖾𝗆  memidx
+      - `"global"` if <var>export</var> is of the form 𝗀𝗅𝗈𝖻𝖺𝗅 globalidx
+  1. Return `true`.
 </div>
 
 <pre class="idl">
