@@ -172,8 +172,7 @@ any other Web API that loads ES6 modules via URL—as part of
 
 Note: WebAssembly JS API declaration file for TypeScript can be found [here](https://github.com/01alchemist/webassembly-types/blob/master/webassembly.d.ts) which enable autocompletion and make TypeScript compiler happy.
 
-Sample API usage
-================
+<h2 id="sample">Sample API usage</h2>
 
 <p><em>This section is non-normative.</em></p>
 
@@ -205,12 +204,11 @@ fetch('demo.wasm').then(response =>
 );
 ```
 
-The WebAssembly Namespace
-======================
+<h2 id="webassembly-namespace">The WebAssembly Namespace</h2>
 
 The following IDL uses a new [InNamespace=_Namespace_] extended attribute.
 - To support constructors which are properties of the WebAssembly object, namespaces define interfacemembers.
-- Rather than being defined on the global object, the constructir is defined on the namespace. In the ECMAScript binding, these are writable, configurable, non-enumerable properties of the namespace. Inner interfaces inherit the exposure set of the outer namespace.
+- Rather than being defined on the global object, the constructor is defined on the namespace. In the ECMAScript binding, these are writable, configurable, non-enumerable properties of the namespace. Inner interfaces inherit the exposure set of the outer namespace.
 - The @@toStringTag of interfaces which are declared in a namespace is the name of the outer namespace, followed by `.`, followed by the name of the interface.
 
 <pre class="idl">
@@ -244,57 +242,57 @@ namespace WebAssembly {
 Should we include notes describing what the functions do, as the HTML spec does? It could look like this:
 
 Note:
-  WebAssembly.validate(<var>bytes</var>) synchronously validates bytes of WebAssembly, returnintrue if the validation was successful.
-  WebAssembly.compile(<var>bytes</var>) asynchronously validates and complies bytes of WebAssembly into a Module.
-  WebAssembly.instantiate(<var>bytes</var>, <var>importObject</var>) asynchronously compiles and instantiates a WebAssembly module from bytes of source.
-  The WebAssembly.instantiate(<var>moduleObject</var>, <var>importObject</var>) asynchronously instantiates a compiled module.
+  WebAssembly.validate(|bytes|) synchronously validates bytes of WebAssembly, returnintrue if the validation was successful.
+  WebAssembly.compile(|bytes|) asynchronously validates and complies bytes of WebAssembly into a Module.
+  WebAssembly.instantiate(|bytes|, |importObject|) asynchronously compiles and instantiates a WebAssembly module from bytes of source.
+  The WebAssembly.instantiate(|moduleObject|, |importObject|) asynchronously instantiates a compiled module.
 -->
 
 <div algorithm>
-  To <dfn>parse a WebAssembly binary module</dfn> from a BufferSource <var>buffer</var>, return a [=module AST=] whose [=binary format of a module|binary format=] is bytewise identical to <var>buffer</var>. If no such AST can be found, throw a {{CompileError}} exception.
+  To <dfn>parse a WebAssembly binary module</dfn> from a BufferSource |buffer|, return a [=module AST=] whose [=binary format of a module|binary format=] is bytewise identical to |buffer|. If no such AST can be found, throw a {{CompileError}} exception.
 </div>
 
 <div algorithm>
-  To <dfn>validate a WebAssembly module</dfn> from a WebAssembly AST <var>ast</var>, perform the following steps:
-    1. Attempt to prove ⊢ <var>ast</var> from the logic in [=WebAssembly module validation=]. If it cannot be derived, throw a {{CompileError}} exception.
+  To <dfn>validate a WebAssembly module</dfn> from a WebAssembly AST |ast|, perform the following steps:
+    1. Attempt to prove ⊢ |ast| from the logic in [=WebAssembly module validation=]. If it cannot be derived, throw a {{CompileError}} exception.
     1. Validate all <code>name</code> productions in the binary format UTF-8, including in a custom <code>name</code> section if present. If validation fails, throw a {{CompileError}} exception.
     1. Return.
 </div>
 
 <div algorithm>
-  The <dfn method for="WebAssembly">validate</dfn>(<var>bytes</var>) method, when invoked, performs the following steps:
-    1. Let <var>ast</var> be the result of {{parsing the WebAssembly binary|parse the WebAssembly binary}}. If this throws an exception, catch it, and return `false`.
-    1. [=validate a WebAssembly module|validate the WebAssembly module=] <var>ast</var>. If this throws an exception, catch it, and return `false`.
+  The <dfn method for="WebAssembly">validate</dfn>(|bytes|) method, when invoked, performs the following steps:
+    1. Let |ast| be the result of {{parsing the WebAssembly binary|parse the WebAssembly binary}}. If this throws an exception, catch it, and return `false`.
+    1. [=validate a WebAssembly module|validate the WebAssembly module=] |ast|. If this throws an exception, catch it, and return `false`.
     1. Return `true`.
 </div>
 
 <div algorithm>
-  To <dfn>compile a WebAssembly module</dfn> from a BufferSource <var>bytes</var>, perform the following steps:
-    1. Let <var>ast</var> be the result of {{parsing the WebAssembly binary|parse the WebAssembly binary}} <var>bytes</var>.
-    1. [=validate a WebAssembly module|validate the WebAssembly module=] <var>ast</var>.
-    1. Let <var>module</var> be a new object whose [[Prototype]] is the original Module prototype.
-    1. Set <var>module</var>.[[Module]] to <var>ast</var>.
-    1. Set <var>module</var>.[[Bytes]] to a copy of the bytes held by the buffer <var>bytes</var>.
-    1. Return <var>module</var>.
+  To <dfn>compile a WebAssembly module</dfn> from a BufferSource |bytes|, perform the following steps:
+    1. Let |ast| be the result of {{parsing the WebAssembly binary|parse the WebAssembly binary}} |bytes|.
+    1. [=validate a WebAssembly module|validate the WebAssembly module=] |ast|.
+    1. Let |module| be a new object whose [[Prototype]] is the original Module prototype.
+    1. Set |module|.[[Module]] to |ast|.
+    1. Set |module|.[[Bytes]] to a copy of the bytes held by the buffer |bytes|.
+    1. Return |module|.
 </div>
 
 <div algorithm>
-  The <dfn method for="WebAssembly">compile</dfn>(<var>bytes</var>) method, when invoked, performs the following steps:
-    1. Let <var>stableBytes</var> be a copy of the bytes held by the buffer source <var>bytes</var>.
-    1. Return a new promise <var>promise</var> and perform the following steps in parallel:
-      1. Compile a WebAssembly module from <var>stableBytes</var>, and let <var>module</var> be the result.  If this throws an exception, catch it, and reject <var>promise</var> with the exception.
-      1. Resolve <var>promise</var> with <var>module</var>.
+  The <dfn method for="WebAssembly">compile</dfn>(|bytes|) method, when invoked, performs the following steps:
+    1. Let |stableBytes| be a copy of the bytes held by the buffer source |bytes|.
+    1. Return a new promise |promise| and perform the following steps in parallel:
+      1. Compile a WebAssembly module from |stableBytes|, and let |module| be the result.  If this throws an exception, catch it, and reject |promise| with the exception.
+      1. Resolve |promise| with |module|.
 </div>
 
 <div algorithm>
-  To <dfn>instantiate a WebAssembly module</dfn> from a {{Module}} <var>moduleObject</var> and imports <var>importObject</var>, perform the following steps:
-    1. Let <var>module</var> be <var>moduleObject</var>.\[[Module]].
-    1. If <var>module</var>.imports is not an empty list, and <var>importObject</var> is undefined, throw a TypeError exception.
-    1. Let <var>funcs</var> be an empty List of callable JavaScript objects.
-    1. Let <var>memories</var> be an empty List of {{Memory}} objects.
-    1. Let <var>tables</var> be an empty List of {{Table}} objects.
-    1. Let <var>imports</var> be an empty List<!-- of [`external`](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L11) values (???)-->.
-    1. For each [=import AST|import=] <var>import</var> in <var>module</var>.imports,
+  To <dfn>instantiate a WebAssembly module</dfn> from a {{Module}} |moduleObject| and imports |importObject|, perform the following steps:
+    1. Let |module| be |moduleObject|.\[[Module]].
+    1. If |module|.imports is not an empty list, and |importObject| is undefined, throw a TypeError exception.
+    1. Let |funcs| be an empty List of callable JavaScript objects.
+    1. Let |memories| be an empty List of {{Memory}} objects.
+    1. Let |tables| be an empty List of {{Table}} objects.
+    1. Let |imports| be an empty List<!-- of [`external`](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L11) values (???)-->.
+    1. For each [=import AST|import=] |import| in |module|.imports,
       1. Let o be the resultant value of performing
          [`Get`](http://tc39.github.io/ecma262/#sec-get-o-p)(`importObject`, [`i.module_name`](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/ast.ml#L170)).
       1. If `Type(o)` is not Object, throw a [`TypeError`](https://tc39.github.io/ecma262/#sec-native-error-types-used-in-this-standard-typeerror).
@@ -417,26 +415,25 @@ Note:
 </div>
 
 <div algorithm>
-  The <dfn method for="WebAssembly">instantiate</dfn>(<var>bytes</var>, <var>importObject</var>) method, when invoked, returns a new promise <var>promise</var> and performs the following steps in parallel:
-    1. Let <var>stableBytes</var> be a copy of the bytes held by the buffer source <var>bytes</var>.
-    1. Return a new promise <var>promise</var> and perform the following steps in parallel:
-      1. Construct a WebAssembly module from <var>stableBytes</var>, and let <var>module</var> be the result.  If this throws an exception, catch it, and reject <var>promise</var> with the exception.
-      1. Instantiate the WebAssembly module <var>module</var> importing <var>importObject</var>, and let <var>instance</var> be the result.  If this throws an exception, catch it, and reject <var>promise</var> with the exception.
-      1. Let <var>result</var> be a {{WebAssemblyInstantiatedSource}} dictionary with {{WebAssemblyInstantiatedSource/module}} set to <var>module</var> and {{WebAssemblyInstantiatedSource/instance}} set to <var>instance</var>.
-      1. Resolve <var>promise</var> with <var>result</var>.
+  The <dfn method for="WebAssembly">instantiate</dfn>(|bytes|, |importObject|) method, when invoked, returns a new promise |promise| and performs the following steps in parallel:
+    1. Let |stableBytes| be a copy of the bytes held by the buffer source |bytes|.
+    1. Return a new promise |promise| and perform the following steps in parallel:
+      1. Construct a WebAssembly module from |stableBytes|, and let |module| be the result.  If this throws an exception, catch it, and reject |promise| with the exception.
+      1. Instantiate the WebAssembly module |module| importing |importObject|, and let |instance| be the result.  If this throws an exception, catch it, and reject |promise| with the exception.
+      1. Let |result| be a {{WebAssemblyInstantiatedSource}} dictionary with {{WebAssemblyInstantiatedSource/module}} set to |module| and {{WebAssemblyInstantiatedSource/instance}} set to |instance|.
+      1. Resolve |promise| with |result|.
 </div>
 
 <div algorithm>
-  The <dfn method for="WebAssembly">instantiate</dfn>(<var>moduleObject</var>, <var>importObject</var>) method, when invoked, returns a new promise <var>promise</var> and performs the following steps in parallel:
-    1. Instantiate the WebAssembly module <var>module</var> importing <var>importObject</var>, and let <var>instance</var> be the result.  If this throws an exception, catch it, and reject <var>promise</var> with the exception.
-    1. Resolve <var>promise</var> with <var>instance</var>.
+  The <dfn method for="WebAssembly">instantiate</dfn>(|moduleObject|, |importObject|) method, when invoked, returns a new promise |promise| and performs the following steps in parallel:
+    1. Instantiate the WebAssembly module |module| importing |importObject|, and let |instance| be the result.  If this throws an exception, catch it, and reject |promise| with the exception.
+    1. Resolve |promise| with |instance|.
 </div>
 
 
 Note: A follow-on streaming API is documented [in the WebAssembly design repository](https://github.com/WebAssembly/design/blob/master/Web.md#additional-web-embedding-api).
 
-Modules
--------
+<h3 id="modules">Modules</h3>
 
 <pre class="idl">
 enum ImportExportKind {
@@ -466,68 +463,67 @@ interface Module {
 };
 </pre>
 
-<div algorithm>
- The <dfn>name of the export</dfn> <var>export</var> in the module <var>module</var> is defined as follows:
-   1. If <var>export</var> is of the form 𝖿𝗎𝗇𝖼 <var>funcidx</var> and <var>module</var> has a name section with a function names subsection,
-     1. Within <code>funcnamesubsec</code>, search for an entry <code>nameassoc</code> of the form <var>funcidx</var> <code>name</code>. If such an entry is found, return <code>name</code> decoded as a UTF-8 into a JavaScript String.
-   1. Return the empty string.
+<div algorithm="name of the export">
+    The <dfn>name of the export</dfn> |export| in the module |module| is defined as follows:
+    1. If |export| is of the form 𝖿𝗎𝗇𝖼 |funcidx| and |module| has a name section with a function names subsection,
+         1. Within <code>funcnamesubsec</code>, search for an entry <code>nameassoc</code> of the form |funcidx| <code>name</code>. If such an entry is found, return <code>name</code> decoded as a UTF-8 into a JavaScript String.
+    1. Return the empty string.
 </div>
 
 <div algorithm>
-  The <dfn method for="Module">exports</dfn>(<var>module</var>) method, when invoked, performs the following steps:
-  1. Let <var>ast</var> be <var>module</var>.[[Module]].
-  1. Let <var>exports</var> be an empty List.
-  1. For each <var>export</var> in <var>ast</var>.exports:
-    1. Let <var>name</var> be <var>export</var>.name as a String.
-    1. Let <var>kind</var> be
-      - `"function"` if <var>export</var>.desc is of the form 𝖿𝗎𝗇𝖼 funcidx
-      - `"table"` if <var>export</var>.desc is of the form 𝗍𝖺𝖻𝗅𝖾 tableidx
-      - `"memory"` if <var>export</var>.desc is of the form 𝗆𝖾𝗆  memidx
-      - `"global"` if <var>export</var>.desc is of the form 𝗀𝗅𝗈𝖻𝖺𝗅 globalidx
-    1. Let <var>obj</var> be ObjectCreate(%ObjectPrototype%).
-    1. Perform CreateDataProperty(obj, `"name"`, <var>name</var>).
-    1. Perform CreateDataProperty(obj, `"kind"`, <var>kind</var>).
-    1. Append <var>obj</obj> to the end of <var>exports</var>.
-  1. Return CreateArrayFromList(<var>exports</var>).
+    The <dfn method for="Module">exports</dfn>(|module|) method, when invoked, performs the following steps:
+    1. Let |ast| be |module|.[[Module]].
+    1. Let |exports| be an empty List.
+    1. For each |export| in |ast|.exports:
+        1. Let |name| be |export|.name as a String.
+        1. Let |kind| be
+            * `"function"` if |export|.desc is of the form 𝖿𝗎𝗇𝖼 funcidx
+            * `"table"` if |export|.desc is of the form 𝗍𝖺𝖻𝗅𝖾 tableidx
+            * `"memory"` if |export|.desc is of the form 𝗆𝖾𝗆    memidx
+            * `"global"` if |export|.desc is of the form 𝗀𝗅𝗈𝖻𝖺𝗅 globalidx
+        1. Let |obj| be ObjectCreate(%ObjectPrototype%).
+        1. Perform CreateDataProperty(obj, `"name"`, |name|).
+        1. Perform CreateDataProperty(obj, `"kind"`, |kind|).
+        1. Append |obj</obj> to the end of |exports|.
+    1. Return CreateArrayFromList(|exports|).
 </div>
 
 <div algorithm>
-  The <dfn method for="Module">imports</dfn>(<var>module</var>) method, when invoked, performs the following steps:
-    1. Let <var>ast</var> be <var>module</var>.[[Module]].
-    1. Let <var>imports</var> be an empty List.
-    1. For each <var>imports</var> in <var>ast</var>.imports:
-      1. Let <var>module</var> be <var>import</var>.module as a String.
-      1. Let <var>name</var> be <var>import</var>.name as a String.
-      1. Let <var>kind</var> be
-        - `"function"` if <var>export</var> is of the form 𝖿𝗎𝗇𝖼 typeidx
-        - `"table"` if <var>export</var> is of the form 𝗍𝖺𝖻𝗅𝖾 tabletype
-        - `"memory"` if <var>export</var> is of the form 𝗆𝖾𝗆  memtype
-        - `"global"` if <var>export</var> is of the form 𝗀𝗅𝗈𝖻𝖺𝗅 globaltype
-      1. Let <var>obj</var> be ObjectCreate(%ObjectPrototype%).
-      1. Perform CreateDataProperty(obj, `"module"`, <var>module</var>).
-      1. Perform CreateDataProperty(obj, `"name"`, <var>name</var>).
-      1. Perform CreateDataProperty(obj, `"kind"`, <var>kind</var>).
-      1. Append <var>obj</obj> to the end of <var>imports</var>.
-    1. Return CreateArrayFromList(<var>imports</var>).
+    The <dfn method for="Module">imports</dfn>(|module|) method, when invoked, performs the following steps:
+    1. Let |ast| be |module|.[[Module]].
+    1. Let |imports| be an empty List.
+    1. For each |imports| in |ast|.imports:
+        1. Let |module| be |import|.module as a String.
+        1. Let |name| be |import|.name as a String.
+        1. Let |kind| be
+            * `"function"` if |export| is of the form 𝖿𝗎𝗇𝖼 typeidx
+            * `"table"` if |export| is of the form 𝗍𝖺𝖻𝗅𝖾 tabletype
+            * `"memory"` if |export| is of the form 𝗆𝖾𝗆  memtype
+            * `"global"` if |export| is of the form 𝗀𝗅𝗈𝖻𝖺𝗅 globaltype
+        1. Let |obj| be ObjectCreate(%ObjectPrototype%).
+        1. Perform CreateDataProperty(obj, `"module"`, |module|).
+        1. Perform CreateDataProperty(obj, `"name"`, |name|).
+        1. Perform CreateDataProperty(obj, `"kind"`, |kind|).
+        1. Append |obj</obj> to the end of |imports|.
+    1. Return CreateArrayFromList(|imports|).
 </div>
 
 <div algorithm>
-  The <dfn method for="Module">customSections</dfn>(<var>module</var>, <var>sectionName</var>) method, when invoked, performs the following steps:
-    1. Let <var>bytes</var> be <var>module</var>.[[Bytes]].
-    1. Let <var>customSections</var> be an empty List.
-    1. For each custom section <var>customSection</var> in the binary format of <var>bytes</var>,
-      1. Let <var>name</var> be the <code>name</code> of the custom section, decoded as UTF-8.
-      1. If SameValue(<var>name</var>, <var>sectionName</var>),
-        1. Append a new ArrayBuffer containing copy of the bytes held by the buffer <var>bytes</var> for the range matched by this customsec production.
-    1. Return CreateArrayFromList(<var>customSections</var>).
+    The <dfn method for="Module">customSections</dfn>(|module|, |sectionName|) method, when invoked, performs the following steps:
+    1. Let |bytes| be |module|.[[Bytes]].
+    1. Let |customSections| be an empty List.
+    1. For each custom section |customSection| in the binary format of |bytes|,
+        1. Let |name| be the <code>name</code> of the custom section, decoded as UTF-8.
+        1. If SameValue(|name|, |sectionName|),
+            1. Append a new ArrayBuffer containing copy of the bytes held by the buffer |bytes| for the range matched by this customsec production.
+    1. Return CreateArrayFromList(|customSections|).
 </div>
 
 <div algorithm>
-  The {{Module}}(<var>bytes</var>) constructor, when invoked, compiles the WebAssembly module <var>bytes</var> returns the result.
+    The {{Module}}(|bytes|) constructor, when invoked, compiles the WebAssembly module |bytes| returns the result.
 </div>
 
-Instances
----------
+<h3 id="instances">Instances</h3>
 
 <pre class="idl">
 [InNamespace=WebAssembly, Contructor(Module module, optional InstanceImportsMap importObject), Exposed=(Window,Worker)]
@@ -536,16 +532,15 @@ interface Instance {
 };
 </pre>
 
-<div algorithm>
-  The {{Instance}}(<var>module</var>, <var>importObject</var>) constructor, when invoked, instantiates the WebAssembly module <var>module</var> importing <var>importObject</var> and returns the result.
+<div algorithm="Instance constructor">
+    The {{Instance}}(|module|, |importObject|) constructor, when invoked, instantiates the WebAssembly module |module| importing |importObject| and returns the result.
 </div>
 
-<div algorithm>
-  The getter of the <code>exports</code> attribute of {{Instance}} returns the receiver's \[[Exports]] internal slot.
+<div algorithm="Instance.exports">
+    The getter of the <code>exports</code> attribute of {{Instance}} returns the receiver's \[[Exports]] internal slot.
 </div>
 
-Memories
---------
+<h3 id="memories">Memories</h3>
 
 <pre class="idl">
 dictionary MemoryDescriptor {
@@ -565,40 +560,41 @@ A {{Memory}} object contains a single memory instance
 which can be simultaneously referenced by multiple `Instance` objects. Each
 `Memory` object has two internal slots:
 
- * [[Memory]] : a memory instance
- * [[BufferObject]] : an ArrayBuffer identifying the same memory 
+    * [[Memory]] : a memory instance
+
+    * [[BufferObject]] : an ArrayBuffer identifying the same memory 
 </div>
 
 <div algorithm>
-  To <dfn>create a memory object</dfn> from a memory instance <var>m</var>, perform the following steps:
-    1. Let <var>block</var> be a Data Block which is identified with the underlying memory of <var>m</var>.data.
-    1. Let <var>buffer</var> be a new ArrayBuffer whose [[ArrayBufferData]] is <var>block</var> and [[ArrayBufferByteLength]] is set to |<var>m</var>.data|.
+    To <dfn>create a memory object</dfn> from a memory instance |m|, perform the following steps:
+
+    1. Let |block| be a Data Block which is identified with the underlying memory of |m|.data.
+    1. Let |buffer| be a new ArrayBuffer whose [[ArrayBufferData]] is |block| and [[ArrayBufferByteLength]] is set to \||m|.data\|.
     1. Return a new {{Memory}} instance with [[Memory]] set to `m` and [[BufferObject]] set to `buffer`.
 
-Note: StructuredSerializeWithTransfer will be updated to to prohibit transfers of Memory, throwing a  "DataCloneError" DOMException, similarly to transferring a detached ArrayBuffer.
+    Note: StructuredSerializeWithTransfer will be updated to to prohibit transfers of Memory, throwing a  "DataCloneError" DOMException, similarly to transferring a detached ArrayBuffer.
 </div>
 
 <div algorithm>
-  The {{Memory}}(<var>descriptor</var>) constructor, when invoked, performs the following steps:
-    1. Let <var>meminst</var> be the memory instance {𝖽𝖺𝗍𝖺 (𝟶𝚡𝟶𝟶)<sup>n⋅64Ki</sup>,𝗆𝖺𝗑 m<sup>?</sup>}.
-    1. Create a memory object from the memory instance <var>meminst</var> and return the result.
+    The {{Memory}}(|descriptor|) constructor, when invoked, performs the following steps:
+    1. Let |meminst| be the memory instance {𝖽𝖺𝗍𝖺 (𝟶𝚡𝟶𝟶)<sup>n⋅64Ki</sup>,𝗆𝖺𝗑 m<sup>?</sup>}.
+    1. Create a memory object from the memory instance |meminst| and return the result.
 </div>
 
 <div algorithm>
-  The {{Memory}}.grow(<var>delta</var>) method, when invoked, performs the following steps:
-    1. Let <var>m</var> be `this`.[[Memory]].
+    The {{Memory}}.grow(|delta|) method, when invoked, performs the following steps:
+    1. Let |m| be `this`.[[Memory]].
     1. Perform part of grow_memory, starting from step 6 through the end of the algorithm.
-    1. Pop the top of the stack and let <var>ret</var> be that value.
-    1. If <var>ret</var> is -1, throw a RangeError exception.
+    1. Pop the top of the stack and let |ret| be that value.
+    1. If |ret| is -1, throw a RangeError exception.
     1. Perform ! DetachArrayBuffer(`this`.[[BufferObject]]).
-    1. Let <var>block</var> be a Data Block which is identified with the underlying memory of <var>m</var>.data.
-    1. Let <var>buffer</var> be a new ArrayBuffer whose [[ArrayBufferData]] is <var>block</var> and [[ArrayBufferByteLength]] is set to |<var>m</var>.data|.
-    1. Set `this`.[[BufferObject]] <var>buffer</var>.
-    1. Return <var>ret</var>.
+    1. Let |block| be a Data Block which is identified with the underlying memory of |m|.data.
+    1. Let |buffer| be a new ArrayBuffer whose [[ArrayBufferData]] is |block| and [[ArrayBufferByteLength]] is set to \||m|.data\|.
+    1. Set `this`.[[BufferObject]] |buffer|.
+    1. Return |ret|.
 </div>
 
-Tables
-------
+<h3 id="tables">Tables</h3>
 
 <pre class="idl">
 enum TableKind {
@@ -627,59 +623,58 @@ A {{Table}} object contains a single table instance
 which can be simultaneously referenced by multiple {{Instance}} objects. Each
 {{Table}} object has one internal slots:
 
- * [[Table]] : a table instance
- * [[Values]] : a List whose elements are either `null` or {{ExportedFunction}}s.
+    * [[Table]] : a table instance
+    * [[Values]] : a List whose elements are either `null` or {{ExportedFunction}}s.
 </div>
 
 <div algorithm>
-  To <dfn>create a table object</dfn> from a table instance <var>t</var>, perform the following steps:
-    1. Let <var>values</var> be a list of length |<var>t</var>.elem| where each element is `null`.
-    1. Return a new {{Memory}} instance with [[Memory]] set to <var>t</var> and [[Values]] set to <var>values</var>.
+    To <dfn>create a table object</dfn> from a table instance |t|, perform the following steps:
+    1. Let |values| be a list of length \||t|.elem\| where each element is `null`.
+    1. Return a new {{Memory}} instance with [[Memory]] set to |t| and [[Values]] set to |values|.
 </div>
 
 <div algorithm>
-  The {{Table}}(<var>descriptor</var>) constructor, when invoked, performs the following steps:
-    1. Let <var>n</var> be <var>descriptor</var>.initial.
-    1. Let <var>m</var> be <var>descriptor</var>.maximum.
-    1. If <var>m</var> &lt; <var>n</var>, throw a RangeError exception.
-    1. Let <var>tableinstance</var> be the table instance {𝖾𝗅𝖾𝗆 (ϵ)<sup>n</sup>,𝗆𝖺𝗑 m<sup>?</sup>} with n empty elements.
-    1. Create a table object from the table instance <var>tableinstance</var> and return the result.
+    The {{Table}}(|descriptor|) constructor, when invoked, performs the following steps:
+    1. Let |n| be |descriptor|.initial.
+    1. Let |m| be |descriptor|.maximum.
+    1. If |m| &lt; |n|, throw a RangeError exception.
+    1. Let |tableinstance| be the table instance {𝖾𝗅𝖾𝗆 (ϵ)<sup>n</sup>,𝗆𝖺𝗑 m<sup>?</sup>} with n empty elements.
+    1. Create a table object from the table instance |tableinstance| and return the result.
 </div>
 
 <div algorithm>
-  The {{Table}}.grow(<var>delta</var>) method, when invoked, performs the following steps:
-    1. Let <var>t</var> be `this`.[[Table]].
-    1. Let <var>initialSize</var> be |<var>t</var>.elem|.
-    1. If <var>delta</var> + <var>initialSize</var> &gt; |<var>t</var>.max|, throw a RangeError exception.
-    1. Append <var>delta</var> empty elements to <var>t</var>.elem. If there is not sufficient memory to perform the operation, throw a RangeError exception.
-    1. Append <var>delta</var> elements with the value `null` to `this`.[[Values]]. If there is not sufficient memory to perform the operation, throw a RangeError exception.
-    1. Return <var>initialSize</var>.
+    The {{Table}}.grow(|delta|) method, when invoked, performs the following steps:
+    1. Let |t| be `this`.[[Table]].
+    1. Let |initialSize| be \||t|.elem\|.
+    1. If |delta| + |initialSize| &gt; \||t|.max\|, throw a RangeError exception.
+    1. Append |delta| empty elements to |t|.elem. If there is not sufficient memory to perform the operation, throw a RangeError exception.
+    1. Append |delta| elements with the value `null` to `this`.[[Values]]. If there is not sufficient memory to perform the operation, throw a RangeError exception.
+    1. Return |initialSize|.
 </div>
 
 <div algorithm>
-  The getter of the <code>length</code> attribute of {{Table}} returns |<var>t</var>.elem| where <var>t</var> is the value of the reciever's [[Table]] internal slot.
+  The getter of the <code>length</code> attribute of {{Table}} returns \||t|.elem\| where |t| is the value of the reciever's [[Table]] internal slot.
 </div>
 
 <div algorithm>
-  The {{Table}}.get(<var>index</var>) method, when invoked, performs the following steps:
-    1. Let <var>t</var> be `this`.[[Table]].
-    1. If <var>index</var> &ge; |<var>t</var>.elem|, throw a RangeError exception.
-    1. Return `this`.[[Values]][<var>index</var>].
+    The {{Table}}.get(|index|) method, when invoked, performs the following steps:
+    1. Let |t| be `this`.[[Table]].
+    1. If |index| &ge; \||t|.elem\|, throw a RangeError exception.
+    1. Return `this`.[[Values]][|index|].
 </div>
 
 <div algorithm>
-  The {{Table}}.set(<var>index</var>, <var>value</var>) method, when invoked, performs the following steps:
-    1. Let <var>t</var> be `this`.[[Table]].
-    1. If <var>index</var> &ge; |<var>t</var>.elem|, throw a RangeError exception.
-    1. If <var>value</var> is `null`, let <var>elem</var> be an empty element.
-    1. Otherwise, let <var>elem</var> be <var>value</var>.[[Closure]].
-    1. Set `this`.[[Table]].elem[<var>index</var>] to <var>elem</var>.
-    1. Set `this`.[[Values]][<var>index</var>] to <var>value</var>.
+    The {{Table}}.set(|index|, |value|) method, when invoked, performs the following steps:
+    1. Let |t| be `this`.[[Table]].
+    1. If |index| &ge; \||t|.elem\|, throw a RangeError exception.
+    1. If |value| is `null`, let |elem| be an empty element.
+    1. Otherwise, let |elem| be |value|.[[Closure]].
+    1. Set `this`.[[Table]].elem[|index|] to |elem|.
+    1. Set `this`.[[Values]][|index|] to |value|.
     1. Return `undefined`.
 </div>
 
-Exported Functions
-------------------
+<h3 id="exported-functions">Exported Functions</h3>
 
 <pre class='idl'>
 [NoInterfaceObject]
@@ -692,45 +687,40 @@ Function* [Exotic Object](http://tc39.github.io/ecma262/#sec-built-in-exotic-obj
 Like [Bound Function](http://tc39.github.io/ecma262/#sec-bound-function-exotic-objects) Exotic Object,
 Exported Functions do not have the normal function internal slots but instead have:
 
- * [[Closure]] : the [closure](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L7)
+    * [[Closure]] : the [closure](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/instance.ml#L7)
    (`index`, `inst`)
 
 as well as the internal slots required of all builtin functions:
 
- * [[Prototype]] : [%FunctionPrototype%](http://tc39.github.io/ecma262/#sec-well-known-intrinsic-objects)
- * [[Extensible]] : `true`
- * [[Realm]] : the [current Realm Record](http://tc39.github.io/ecma262/#current-realm)
- * [[ScriptOrModule]] : [`GetActiveScriptOrModule`](http://tc39.github.io/ecma262/#sec-getactivescriptormodule)
+    * [[Prototype]] : [%FunctionPrototype%](http://tc39.github.io/ecma262/#sec-well-known-intrinsic-objects)
+    * [[Extensible]] : `true`
+    * [[Realm]] : the [current Realm Record](http://tc39.github.io/ecma262/#current-realm)
+    * [[ScriptOrModule]] : [`GetActiveScriptOrModule`](http://tc39.github.io/ecma262/#sec-getactivescriptormodule)
 
 Exported Functions also have the following data properties:
 
-* the `length` property is set to the exported function's signature's arity 
-* the `name` is set to [`ToString`](https://tc39.github.io/ecma262/#sec-tostring)(`index`)
+    * the `length` property is set to the exported function's signature's arity 
+    * the `name` is set to [`ToString`](https://tc39.github.io/ecma262/#sec-tostring)(`index`)
 
 WebAssembly Exported Functions have a `[[Call]](this, argValues)` method defined as:
 
-1. Let `sig` be the [`function type`](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/eval.ml#L106)
-   of the function's [[Closure]].
-1. If `sig` contains an `i64` (as argument or result), a
-   [`TypeError`](https://tc39.github.io/ecma262/#sec-native-error-types-used-in-this-standard-typeerror)
-   is thrown each time the [[Call]] method is invoked.
-1. Let `args` be an empty list of coerced values.
-1. Let `inArity` be the number of arguments and `outArity` be the number of results in `sig`.
-1. For all values `v` in `argValues`, in the order of their appearance:
-  1. If the length of`args` is less than `inArity`, append [`ToWebAssemblyValue`](#towebassemblyvalue)`(v)` to `args`.
-1. While the length of `args` is less than `inArity`, append [`ToWebAssemblyValue`](#towebassemblyvalue)`(undefined)` to `args`.
-1. Let `ret` be the result of calling [`Eval.invoke`](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/eval.ml#L443)
-   passing [[Closure]], and `args`.
-1. If `outArity` is 0, return `undefined`.
-1. Otherwise, return [`ToJSValue`](#tojsvalue)`(v)`, where `v` is the singular element of `ret`.
+    1. Let `sig` be the [`function type`](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/eval.ml#L106) of the function's [[Closure]].
+    1. If `sig` contains an `i64` (as argument or result), a [`TypeError`](https://tc39.github.io/ecma262/#sec-native-error-types-used-in-this-standard-typeerror) is thrown each time the [[Call]] method is invoked.
+    1. Let `args` be an empty list of coerced values.
+    1. Let `inArity` be the number of arguments and `outArity` be the number of results in `sig`.
+    1. For all values `v` in `argValues`, in the order of their appearance:
+      1. If the length of`args` is less than `inArity`, append [`ToWebAssemblyValue`](#towebassemblyvalue)`(v)` to `args`.
+    1. While the length of `args` is less than `inArity`, append [`ToWebAssemblyValue`](#towebassemblyvalue)`(undefined)` to `args`.
+    1. Let `ret` be the result of calling [`Eval.invoke`](https://github.com/WebAssembly/spec/blob/master/interpreter/spec/eval.ml#L443) passing [[Closure]], and `args`.
+    1. If `outArity` is 0, return `undefined`.
+    1. Otherwise, return [`ToJSValue`](#tojsvalue)`(v)`, where `v` is the singular element of `ret`.
 
 `[[Call]](this, argValues)` executes in the [[Realm]] of the callee Exported Function. This corresponds to [the requirements of builtin function objects in JavaScript](https://tc39.github.io/ecma262/#sec-built-in-function-objects).
 
 Exported Functions do not have a [[Construct]] method and thus it is not possible to 
 call one with the `new` operator.
 
-Conversion algorithms
----------------------
+<h3 id="conversion functions">Conversion algorithms</h3>
 
 ## ToJSValue
 
@@ -739,13 +729,9 @@ to a JavaScript value:
 
 Assert: the WebAssembly value's type is not `i64`.
 
-1. given a WebAssembly `i32` is interpreted as a signed integer, converted (losslessly) to an
-  IEEE754 double and then returned as a JavaScript Number
-1. given a WebAssembly `f32` (single-precision IEEE754), convert (losslessly) to
-   a IEEE754 double, [possibly canonicalize NaN](http://tc39.github.io/ecma262/#sec-setvalueinbuffer),
-   and return as a JavaScript Number
-1. given a WebAssembly `f64`, [possibly canonicalize NaN](http://tc39.github.io/ecma262/#sec-setvalueinbuffer)
-   and return as a JavaScript Number
+1. given a WebAssembly `i32` is interpreted as a signed integer, converted (losslessly) to an IEEE754 double and then returned as a JavaScript Number
+1. given a WebAssembly `f32` (single-precision IEEE754), convert (losslessly) to a IEEE754 double, [possibly canonicalize NaN](http://tc39.github.io/ecma262/#sec-setvalueinbuffer), and return as a JavaScript Number
+1. given a WebAssembly `f64`, [possibly canonicalize NaN](http://tc39.github.io/ecma262/#sec-setvalueinbuffer) and return as a JavaScript Number
 
 If the WebAssembly value is optional, then given `None`, return JavaScript value
 `undefined`.
@@ -757,15 +743,13 @@ To coerce a JavaScript value to a given WebAssembly [`value type`](https://githu
 Assert: the target value type is not `i64`.
 
 1. coerce to `i32` via [`ToInt32(v)`](http://tc39.github.io/ecma262/#sec-toint32)
-1. coerce to `f32` by first applying [`ToNumber(v)`](http://tc39.github.io/ecma262/#sec-tonumber)
-   and then converting the resulting IEEE754 64-bit double to a 32-bit float using `roundTiesToEven`
+1. coerce to `f32` by first applying [`ToNumber(v)`](http://tc39.github.io/ecma262/#sec-tonumber) and then converting the resulting IEEE754 64-bit double to a 32-bit float using `roundTiesToEven`
 1. coerce to `f64` via [`ToNumber(v)`](http://tc39.github.io/ecma262/#sec-tonumber)
 
 If the value type is optional, then given `None`, the JavaScript value is
 ignored.
 
-Error objects
--------------
+<h3 id="error-objects">Error objects</h3>
 
 WebAssembly defines three Error classes. Analogous to DOMException, WebAssembly errors have the following custom bindings:
 - Unlike normal interface types, the interface prototype object for DOMException must have as its [[Prototype]] the intrinsic object %ErrorPrototype%.
@@ -783,8 +767,7 @@ interface LinkError { }
 interface RuntimeError { }
 </pre>
 
-Error condition mappings to JavaScript
-======================================
+<h2 id="errors">Error condition mappings to JavaScript</h2>
 
 Running WebAssembly programs encounter certain events which halt execution of the WebAssembly code.
 WebAssembly code (currently)
@@ -800,21 +783,18 @@ Because JavaScript exceptions can be handled, and JavaScript can continue to
 call WebAssembly exports after a trap has been handled, traps do not, in
 general, prevent future execution.
 
-Traps
------
+<h3 id="traps">Traps</h3>
 
 Whenever WebAssembly semantics specify a [trap](https://webassembly.github.io/spec/intro/overview.html#trap),
 a {{RuntimeError}} object is thrown to the enclosing JavaScript. 
 
-Stack Overflow
---------------
+<h3 id="stack-overflow">Stack Overflow</h3>
 
 Whenever a stack overflow occurs in
 WebAssembly code, the same class of exception is thrown as for a stack overflow in
 JavaScript. The particular exception here is implementation-defined in both cases.
 
-Out of Memory
--------------
+<h3 id="out-of-memory">Out of Memory</h3>
 
 Whenever validation, compilation or instantiation run out of memory, the
 same class of exception is thrown as for out of memory conditions in JavaScript.
