@@ -216,9 +216,9 @@ typedef (ExportedFunction or double or
          Memory or Table)
     WebAssemblyRuntimeValue;
 
-typedef record<string, WebAssemblyRuntimeValue> InstanceExportMap;
+typedef (record&lt;DOMString, WebAssemblyRuntimeValue&gt;) InstanceExportMap;
 
-typedef record<string, InstanceExportsMap> InstanceImportsMap;
+typedef record&lt;DOMString, InstanceExportsMap&gt; InstanceImportsMap;
 
 dictionary WebAssemblyInstantiatedSource {
    required Module module;
@@ -228,12 +228,12 @@ dictionary WebAssemblyInstantiatedSource {
 [Exposed=(Window,Worker)]
 namespace WebAssembly {
   boolean validate(BufferSource bytes);
-  Promise<Module> compile(BufferSource bytes);
+  Promise&lt;Module> compile(BufferSource bytes);
   
-  Promise<WebAssemblyInstantiatedSource> instantiate(
+  Promise&lt;WebAssemblyInstantiatedSource> instantiate(
       BufferSource bytes, optional InstanceImportsMap importObject);
 
-  Promise<Instance> instantiate(
+  Promise&lt;Instance> instantiate(
       Module moduleObject, optional InstanceImportsMap importObject);
 };
 </pre>
@@ -415,7 +415,7 @@ Note:
 </div>
 
 <div algorithm>
-  The <dfn method for="WebAssembly">instantiate</dfn>(|bytes|, |importObject|) method, when invoked, returns a new promise |promise| and performs the following steps in parallel:
+  The <dfn method for="WebAssembly">instantiate(bytes, importObject)</dfn> method, when invoked, returns a new promise |promise| and performs the following steps in parallel:
     1. Let |stableBytes| be a copy of the bytes held by the buffer source |bytes|.
     1. Return a new promise |promise| and perform the following steps in parallel:
       1. Construct a WebAssembly module from |stableBytes|, and let |module| be the result.  If this throws an exception, catch it, and reject |promise| with the exception.
@@ -425,7 +425,7 @@ Note:
 </div>
 
 <div algorithm>
-  The <dfn method for="WebAssembly">instantiate</dfn>(|moduleObject|, |importObject|) method, when invoked, returns a new promise |promise| and performs the following steps in parallel:
+  The <dfn method for="WebAssembly">instantiate(moduleObject, importObject)</dfn> method, when invoked, returns a new promise |promise| and performs the following steps in parallel:
     1. Instantiate the WebAssembly module |module| importing |importObject|, and let |instance| be the result.  If this throws an exception, catch it, and reject |promise| with the exception.
     1. Resolve |promise| with |instance|.
 </div>
@@ -444,22 +444,22 @@ enum ImportExportKind {
 };
 
 dictionary ModuleExportDescriptor {
-  required string name;
+  required DOMString name;
   required ImportExportKind kind;
   // Note: Other fields such as signature may be added in the future.
 };
 
 dictionary ModuleImportDescriptor {
-  required string module;
-  required string name;
+  required DOMString module;
+  required DOMString name;
   required ImportExportKind kind;
 };
 
 [InNamespace=WebAssembly, Contructor(BufferSource bytes), Exposed=(Window, Worker)]
 interface Module {
-  static sequence<ModuleExportDescriptor> exports(Module module);
-  static sequence<ModuleImportDescriptor> imports(Module module);
-  static sequence<ArrayBuffer> customSections(Module module, string sectionName);
+  static sequence&lt;ModuleExportDescriptor> exports(Module module);
+  static sequence&lt;ModuleImportDescriptor> imports(Module module);
+  static sequence&lt;ArrayBuffer> customSections(Module module, DOMString sectionName);
 };
 </pre>
 
@@ -471,7 +471,7 @@ interface Module {
 </div>
 
 <div algorithm>
-    The <dfn method for="Module">exports</dfn>(|module|) method, when invoked, performs the following steps:
+    The <dfn method for="Module">exports(module)</dfn> method, when invoked, performs the following steps:
     1. Let |ast| be |module|.[[Module]].
     1. Let |exports| be an empty List.
     1. For each |export| in |ast|.exports:
@@ -515,12 +515,12 @@ interface Module {
     1. For each custom section |customSection| in the binary format of |bytes|,
         1. Let |name| be the <code>name</code> of the custom section, decoded as UTF-8.
         1. If SameValue(|name|, |sectionName|),
-            1. Append a new ArrayBuffer containing copy of the bytes held by the buffer |bytes| for the range matched by this customsec production.
+            1. Append a new ArrayBuffer containing a [=copy of the bytes held by the buffer=] |bytes| for the range matched by this customsec production.
     1. Return CreateArrayFromList(|customSections|).
 </div>
 
 <div algorithm>
-    The {{Module}}(|bytes|) constructor, when invoked, compiles the WebAssembly module |bytes| returns the result.
+    The <dfn constructor for="Module">Module(bytes)</dfn> constructor, when invoked, [=compiles the WebAssembly module=] |bytes| and returns the result.
 </div>
 
 <h3 id="instances">Instances</h3>
@@ -532,12 +532,12 @@ interface Instance {
 };
 </pre>
 
-<div algorithm="Instance constructor">
-    The {{Instance}}(|module|, |importObject|) constructor, when invoked, instantiates the WebAssembly module |module| importing |importObject| and returns the result.
+<div algorithm>
+    The <dfn constructor for="Instance">Instance(module, importObject)</dfn> constructor, when invoked, instantiates the WebAssembly module |module| importing |importObject| and returns the result.
 </div>
 
-<div algorithm="Instance.exports">
-    The getter of the <code>exports</code> attribute of {{Instance}} returns the receiver's \[[Exports]] internal slot.
+<div algorithm>
+    The getter of the <dfn for="Instance">exports</dfn> attribute of {{Instance}} returns the receiver's \[[Exports]] internal slot.
 </div>
 
 <h3 id="memories">Memories</h3>
@@ -545,7 +545,7 @@ interface Instance {
 <pre class="idl">
 dictionary MemoryDescriptor {
   required [EnforceRange] unsigned long initial;
-  optional [EnforceRange] unsigned long maximum;
+  [EnforceRange] unsigned long maximum;
 };
 
 [InNamespace=WebAssembly, Constructor(MemoryDecriptor descriptor), Exposed=(Window,Worker)]
@@ -576,13 +576,13 @@ which can be simultaneously referenced by multiple `Instance` objects. Each
 </div>
 
 <div algorithm>
-    The {{Memory}}(|descriptor|) constructor, when invoked, performs the following steps:
+    The <dfn constructor for="Memory">Memory(descriptor)</dfn> constructor, when invoked, performs the following steps:
     1. Let |meminst| be the memory instance {𝖽𝖺𝗍𝖺 (𝟶𝚡𝟶𝟶)<sup>n⋅64Ki</sup>,𝗆𝖺𝗑 m<sup>?</sup>}.
     1. Create a memory object from the memory instance |meminst| and return the result.
 </div>
 
 <div algorithm>
-    The {{Memory}}.grow(|delta|) method, when invoked, performs the following steps:
+    The <dfn for="Memory">grow(delta)</dfn> method, when invoked, performs the following steps:
     1. Let |m| be `this`.[[Memory]].
     1. Perform part of grow_memory, starting from step 6 through the end of the algorithm.
     1. Pop the top of the stack and let |ret| be that value.
@@ -604,16 +604,14 @@ enum TableKind {
 dictionary TableDescriptor {
   required TableKind element;
   required [EnforceRange] unsigned long initial;
-  optional [EnforceRange] unsigned long maximum;
+  [EnforceRange] unsigned long maximum;
 };
-
-typedef (ExportedFunction or null) OptionalExportedFunction;
 
 [InNamespace=WebAssembly, Constructor(TableDecriptor descriptor), Exposed=(Window,Worker)]
 interface Table {
   void grow([EnforceRange] unsigned long delta);
-  OptionalExportedFunction get([EnforceRange] unsigned long delta);
-  set([EnforceRange] unsigned long delta, OptionalExportedFunction value);
+  ExportedFunction? get([EnforceRange] unsigned long delta);
+  set([EnforceRange] unsigned long delta, ExportedFunction? value);
   readonly attribute unsigned long length;
 };
 </pre>
@@ -634,7 +632,7 @@ which can be simultaneously referenced by multiple {{Instance}} objects. Each
 </div>
 
 <div algorithm>
-    The {{Table}}(|descriptor|) constructor, when invoked, performs the following steps:
+    The <dfn constructor for="Table">Table(descriptor)</dfn> constructor, when invoked, performs the following steps:
     1. Let |n| be |descriptor|.initial.
     1. Let |m| be |descriptor|.maximum.
     1. If |m| &lt; |n|, throw a RangeError exception.
@@ -643,28 +641,28 @@ which can be simultaneously referenced by multiple {{Instance}} objects. Each
 </div>
 
 <div algorithm>
-    The {{Table}}.grow(|delta|) method, when invoked, performs the following steps:
+    The <dfn for="Table">grow(d)</dfn> method, when invoked, performs the following steps:
     1. Let |t| be `this`.[[Table]].
     1. Let |initialSize| be \||t|.elem\|.
-    1. If |delta| + |initialSize| &gt; \||t|.max\|, throw a RangeError exception.
-    1. Append |delta| empty elements to |t|.elem. If there is not sufficient memory to perform the operation, throw a RangeError exception.
-    1. Append |delta| elements with the value `null` to `this`.[[Values]]. If there is not sufficient memory to perform the operation, throw a RangeError exception.
+    1. If |d| + |initialSize| &gt; \||t|.max\|, throw a RangeError exception.
+    1. Append |d| empty elements to |t|.elem. If there is not sufficient memory to perform the operation, throw a RangeError exception.
+    1. Append |d| elements with the value `null` to `this`.[[Values]]. If there is not sufficient memory to perform the operation, throw a RangeError exception.
     1. Return |initialSize|.
 </div>
 
 <div algorithm>
-  The getter of the <code>length</code> attribute of {{Table}} returns \||t|.elem\| where |t| is the value of the reciever's [[Table]] internal slot.
+  The getter of the <dfn for="Table">length</dfn> attribute of {{Table}} returns \||t|.elem\| where |t| is the value of the reciever's [[Table]] internal slot.
 </div>
 
 <div algorithm>
-    The {{Table}}.get(|index|) method, when invoked, performs the following steps:
+    The <dfn for="Table">get(index)</dfn> method, when invoked, performs the following steps:
     1. Let |t| be `this`.[[Table]].
     1. If |index| &ge; \||t|.elem\|, throw a RangeError exception.
     1. Return `this`.[[Values]][|index|].
 </div>
 
 <div algorithm>
-    The {{Table}}.set(|index|, |value|) method, when invoked, performs the following steps:
+    The <dfn for="Table">set(index, value)</dfn> method, when invoked, performs the following steps:
     1. Let |t| be `this`.[[Table]].
     1. If |index| &ge; \||t|.elem\|, throw a RangeError exception.
     1. If |value| is `null`, let |elem| be an empty element.
